@@ -7,11 +7,13 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Shop from "./pages/Shop";
 import Cart from "./pages/Cart";
+import SplashScreen from "./components/SplashScreen";
 import ProductDetails from "./pages/ProductDetails";
 import { products } from "./data/products";
 
 export default function App() {
   const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const addToCart = (product) => {
     setCartItems((prev) => {
@@ -22,6 +24,9 @@ export default function App() {
   };
 
   return (
+    <> 
+     {loading && <SplashScreen onFinish={() => setLoading(false)} />}
+      {!loading && (
     <Router>
       <Navbar cartItems={cartItems} />
       
@@ -37,5 +42,7 @@ export default function App() {
         </Routes>
       </div>
     </Router>
+      )}
+    </>
   );
 }
