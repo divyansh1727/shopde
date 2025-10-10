@@ -5,39 +5,47 @@ import v1 from "../assets/images/v1.mp4";
 
 export default function Home({ addToCart }) {
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
+    <div className="relative w-full overflow-hidden">
+      {/* 🎥 Background video */}
       <video
-        style={{
-          position: "fixed",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          zIndex: -10,
-          pointerEvents: "none" // ensures video doesn't block clicks
-        }}
+        className="fixed top-0 left-0 w-full h-full object-cover -z-10"
         src={v1}
         autoPlay
         loop
         muted
         playsInline
       />
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: -9, pointerEvents: "none" }} />
+      {/* 🔲 Dark overlay for better contrast */}
+      <div className="fixed inset-0 bg-black/60 -z-10" />
 
-      <div style={{ position: "relative", zIndex: 20, padding: "6rem 1.5rem 3rem" }}>
-        <section style={{ textAlign: "center", padding: "4rem 0", color: "#fff" }}>
-          <h1 style={{ fontSize: "3rem", fontWeight: 700, marginBottom: ".75rem" }}>Elevate Your Style</h1>
-          <p style={{ color: "#d1d5db", marginBottom: "1rem" }}>Black. White. Bold. Modern fashion redefined.</p>
-          <Link to="/shop" style={{ border: "1px solid #fff", padding: ".5rem 1rem" }}>Shop Now</Link>
-        </section>
+      {/* 🧭 Content */}
+      <div className="relative z-20 flex flex-col items-center justify-center min-h-screen text-center text-white px-6">
+        <h1 className="text-5xl md:text-6xl font-extrabold mb-4 tracking-wide">
+          Elevate Your Style
+        </h1>
+        <p className="text-gray-300 text-lg mb-6 max-w-xl">
+          Black. White. Bold. Modern fashion redefined.
+        </p>
+        <Link
+          to="#featured"
+          className="border border-white px-6 py-2 text-lg hover:bg-white hover:text-black transition rounded-md"
+        >
+          Shop Now
+        </Link>
+      </div>
 
-        <h2 style={{ fontSize: "1.5rem", margin: "1.5rem 0", textAlign: "center", color: "#fff" }}>Featured</h2>
-        <div style={{ display: "grid", gap: "2rem", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+      {/* 🛍️ Featured Products */}
+      <section id="featured" className="relative z-20 bg-black/80 py-16 px-6">
+        <h2 className="text-3xl font-semibold text-center text-white mb-10">
+          Featured
+        </h2>
+
+        <div className="grid gap-8 grid-cols-[repeat(auto-fit,minmax(220px,1fr))] max-w-6xl mx-auto">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} addToCart={addToCart} />
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

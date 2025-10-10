@@ -4,7 +4,7 @@ export default function About() {
       <section className="max-w-4xl mx-auto text-center py-20">
         <h1 className="text-5xl font-bold mb-6">About Our Brand</h1>
         <p className="text-gray-300 text-lg mb-6">
-          At [Brand Name], we redefine fashion with bold, minimalist designs.
+          At Yapper, we redefine fashion with bold, minimalist designs.
           We believe in quality, sustainability, and empowering your personal style.
         </p>
         <p className="text-gray-400 text-lg">
