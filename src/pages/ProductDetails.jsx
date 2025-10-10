@@ -1,7 +1,20 @@
+import { useParams } from "react-router-dom";
 import { useState } from "react";
+import { products } from "../data/products"; // import directly
 
-export default function ProductDetails({ product, addToCart }) {
+export default function ProductDetails({ addToCart }) {
+  const { id } = useParams();
+  const product = products.find((p) => p.id.toString() === id);
+
   const [qty, setQty] = useState(1);
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white text-xl">
+        Product not found 😢
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-8">

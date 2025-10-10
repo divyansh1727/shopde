@@ -29,12 +29,17 @@ export default function Home({ addToCart }) {
         <p className="text-gray-300 text-lg mb-6 max-w-xl">
           Black. White. Bold. Modern fashion redefined.
         </p>
-        <Link
-          to="#featured"
-          className="border border-white px-6 py-2 text-lg hover:bg-white hover:text-black transition rounded-md"
-        >
-          Shop Now
-        </Link>
+        <button
+  onClick={() =>
+    document.getElementById("featured")?.scrollIntoView({ behavior: "smooth" })
+  }
+  className="border border-white px-6 py-2 text-lg hover:bg-white hover:text-black transition rounded-md"
+>
+  Shop Now
+</button>
+
+
+
       </div>
 
       {/* 🛍️ Featured Products */}

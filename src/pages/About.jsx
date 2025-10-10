@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-
+import a1 from "../assets/images/a1.jpg"
 export default function About() {
   return (
     <div className="relative min-h-screen bg-black text-white p-8">
@@ -39,7 +39,7 @@ export default function About() {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <img
-            src="/assets/images/about1.jpg"
+            src={a1}
             alt="Fashion"
             className="rounded-xl object-cover w-full h-80"
           />

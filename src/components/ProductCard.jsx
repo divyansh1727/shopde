@@ -14,23 +14,27 @@ export default function ProductCard({ product, addToCart }) {
   return (
     <div className="relative bg-white rounded-xl overflow-hidden shadow-lg group hover:shadow-2xl transition-shadow duration-300">
 
-      {/* Product Image */}
+      {/* 🖼️ Product Image */}
       <img
         src={product.image}
         alt={product.name}
         className="w-full h-64 object-cover"
       />
 
-      {/* Desktop Overlay (slide-up) */}
-      <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center gap-3
-                      opacity-0 translate-y-10 group-hover:opacity-100 group-hover:translate-y-0
-                      transition-all duration-300 md:flex">
+      {/* 💫 Desktop Hover Overlay */}
+      <div
+        className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center gap-3
+        opacity-0 translate-y-10 group-hover:opacity-100 group-hover:translate-y-0
+        transition-all duration-300 md:flex"
+      >
         <button
           onClick={handleAddToCart}
           className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded font-semibold hover:bg-gray-200 transition"
         >
           <FaShoppingCart /> Add to Cart
         </button>
+
+        {/* ✅ View Details navigates correctly */}
         <Link
           to={`/product/${product.id}`}
           className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded font-semibold hover:bg-gray-200 transition"
@@ -39,7 +43,7 @@ export default function ProductCard({ product, addToCart }) {
         </Link>
       </div>
 
-      {/* Mobile Buttons (always visible) */}
+      {/* 📱 Mobile Buttons (always visible) */}
       <div className="flex justify-center items-center gap-3 mt-3 md:hidden px-2">
         <button
           onClick={handleAddToCart}
@@ -47,6 +51,7 @@ export default function ProductCard({ product, addToCart }) {
         >
           <FaShoppingCart /> Add to Cart
         </button>
+
         <Link
           to={`/product/${product.id}`}
           className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded font-semibold hover:bg-gray-800 transition"
@@ -55,20 +60,20 @@ export default function ProductCard({ product, addToCart }) {
         </Link>
       </div>
 
-      {/* Fly-to-cart animation */}
+      {/* 🛒 Fly-to-Cart Animation */}
       {flying && (
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full flex items-center justify-center text-black animate-flyCart z-50">
           <FaShoppingCart />
         </div>
       )}
 
-      {/* Product Info */}
+      {/* 📋 Product Info */}
       <div className="p-4 text-center">
         <h3 className="text-lg font-semibold">{product.name}</h3>
         <p className="text-gray-600 mt-1">${product.price}</p>
       </div>
 
-      {/* Fly-to-cart animation keyframes */}
+      {/* 🎬 Fly Animation Keyframes */}
       <style>
         {`
           @keyframes flyCart {
