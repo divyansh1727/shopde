@@ -1,8 +1,60 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { products } from "../data/products";
+import { API} from "../lib/api";
+export default function Shop({ addToCart, user }) {
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(user);
 
-export default function Shop({ addToCart }) {
+  // ✅ Check user login state from localStorage (persists even after refresh)
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+  }, [user]);
+
+  const handleAddToCart = async (product) => {
+    const token = localStorage.getItem("token");
+
+    // ✅ If not logged in, redirect to login (and remember last page)
+    if (!token || !currentUser) {
+      localStorage.setItem("redirectAfterLogin", window.location.pathname);
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/api/cart/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        console.log("✅ Added to cart:", data);
+        alert("Item added to cart successfully!");
+        if (addToCart) addToCart(product); // Update UI cart count
+      } else {
+        console.error("❌ Server error:", data);
+        alert(data.message || "Failed to add item to cart");
+      }
+    } catch (err) {
+      console.error("❌ Error adding to cart:", err);
+      alert("Something went wrong while adding to cart");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white py-24 px-8">
       <h1 className="text-3xl font-bold text-center mb-10">Shop Our Collection</h1>
@@ -22,8 +74,8 @@ export default function Shop({ addToCart }) {
             <p className="text-gray-400 mb-2">₹{product.price}</p>
             <div className="mt-auto flex justify-between items-center">
               <button
-                onClick={() => addToCart(product)}
-                className="bg-white text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-gray-300"
+                onClick={() => handleAddToCart(product)}
+                className="bg-white text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-gray-300 transition"
               >
                 Add to Cart
               </button>

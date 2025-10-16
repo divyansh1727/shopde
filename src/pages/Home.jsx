@@ -115,7 +115,7 @@ export default function Home({ addToCart }) {
 
       {/* 🦶 Footer */}
       <footer className="relative z-20 bg-black py-8 px-6 text-gray-400 text-center">
-        <p>&copy; {new Date().getFullYear()} Elevate Fashion. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Yapper Fashion. All rights reserved.</p>
         <div className="flex justify-center gap-6 mt-4 text-2xl">
           <a
             href="https://www.instagram.com/pourbykay"

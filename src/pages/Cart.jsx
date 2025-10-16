@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Cart({ cartItems, setCartItems }) {
+  const navigate = useNavigate();
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
   const handleQtyChange = (id, type) => {
@@ -12,6 +13,24 @@ export default function Cart({ cartItems, setCartItems }) {
           : item
       )
     );
+  };
+
+  // 🧠 NEW: checkout button logic
+  const handleCheckout = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("⚠️ Please login to proceed to checkout!");
+      navigate("/login");
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      alert("🛒 Your cart is empty!");
+      return;
+    }
+
+    navigate("/checkout");
   };
 
   return (
@@ -60,12 +79,12 @@ export default function Cart({ cartItems, setCartItems }) {
           </div>
 
           <div className="text-center mt-6">
-            <Link
-              to="/checkout"
+            <button
+              onClick={handleCheckout}
               className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
             >
-              Proceed to Checkout
-            </Link>
+              Proceed to Checkout →
+            </button>
           </div>
         </div>
       )}
