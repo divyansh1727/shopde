@@ -64,12 +64,7 @@ export default function Navbar({ cartCount, user, setUser }) {
             >
               Login
             </Link>
-            <Link
-              to="/register"
-              className="px-3 py-1 border border-white rounded-md hover:bg-gray-800 transition"
-            >
-              Register
-            </Link>
+           
           </>
         ) : (
           <button
