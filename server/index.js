@@ -46,6 +46,8 @@ app.use("/api/orders", orderRoutes);
 app.get("/", (req, res) => {
   res.send("✅ Backend is running successfully!");
 });
+app.get("/test", (req, res) => res.send("🧠 Test route working fine!"));
+
 
 // ✅ Server start
 const PORT = process.env.PORT || 5000;
