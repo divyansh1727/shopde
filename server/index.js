@@ -11,17 +11,29 @@ connectDB();
 
 const app = express();
 
-// ✅ Correct CORS setup — put this BEFORE your routes
+// ✅ Correct, production-safe CORS setup
+const allowedOrigins = [
+  "http://localhost:5173",              // Local dev
+  "https://shopde-sigma.vercel.app",    // Your deployed frontend
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",       // your local frontend (for dev)
-      "https://shopde-sigma.vercel.app", // your deployed frontend (for prod)
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
+
+// ✅ Handle preflight (important for CORS)
+app.options("*", cors());
 
 app.use(express.json());
 
@@ -35,5 +47,6 @@ app.get("/", (req, res) => {
   res.send("✅ Backend is running successfully!");
 });
 
+// ✅ Server start
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
