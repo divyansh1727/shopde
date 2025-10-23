@@ -14,10 +14,22 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API}/api/auth/register`, formData);
+      const res = await axios.post(
+        `${API}/api/auth/register`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true, // ✅ allows cross-origin requests with cookies
+        }
+      );
+
+      console.log("✅ Registration Success:", res.data);
       setMessage("🎉 Account created successfully!");
       setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
+      console.error("❌ Registration Error:", err);
       setMessage(err.response?.data?.message || "Registration failed ❌");
     }
   };

@@ -15,13 +15,20 @@ export default function Register() {
     e.preventDefault();
     try {
       // Step 1: Try registering
-      await axios.post(`${API}/api/auth/register`, formData);
+      await axios.post(`${API}/api/auth/register`, formData,{
+        headers: { "Content-Type": "application/json" },
+  withCredentials: true,
+      });
 
       // Step 2: Auto-login after registration
       const loginRes = await axios.post(`${API}/api/auth/login`, {
         email: formData.email,
         password: formData.password,
-      });
+      },
+    {
+    headers: { "Content-Type": "application/json" },
+    withCredentials: true,
+  });
 
       // ✅ Store both token & user consistently
       localStorage.setItem("token", loginRes.data.token);
