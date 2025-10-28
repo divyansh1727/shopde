@@ -36,7 +36,7 @@ export default function Checkout({ cartItems, setCartItems }) {
       return;
     }
 
-    const res = await fetch(`${API}/api/orders/place`, {
+    const res = await fetch(`${API}/api/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

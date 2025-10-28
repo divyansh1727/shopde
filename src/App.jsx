@@ -1,7 +1,7 @@
 import axios from "axios";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
-
+import { API } from "./lib/api";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -54,7 +54,7 @@ export default function App() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/cart/add",
+        `${API}/api/cart/add`,
         {
           productId: product.id,
           name: product.name,
