@@ -1,21 +1,31 @@
 import express from "express";
-import PDFDocument from "pdfkit";
-import nodemailer from "nodemailer";
+import PDFDocument from "pdfkit"; 
+import dotenv from "dotenv";
+import { Resend } from "resend";
 import Order from "../models/Order.js";
 import jwt from "jsonwebtoken";
 
+dotenv.config();
+
 const router = express.Router();
 
+// ✅ Initialize Resend safely *after* env is confirmed loaded
+let resend = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+  console.log("✅ Resend initialized successfully.");
+} else {
+  console.warn("⚠️ RESEND_API_KEY missing — emails will be skipped.");
+}
+
+// ✅ Order API route
 router.post("/", async (req, res) => {
   console.log("📦 Order API hit with data:", req.body);
 
   try {
-    // ✅ 1. Verify and decode token
+    // 1️⃣ Verify token
     const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      console.error("❌ No token provided");
-      return res.status(401).json({ message: "No token provided" });
-    }
+    if (!token) return res.status(401).json({ message: "No token provided" });
 
     let decoded;
     try {
@@ -25,24 +35,18 @@ router.post("/", async (req, res) => {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
 
-    // ✅ 2. Extract user ID from token payload
     const userId = decoded?.id || decoded?._id || decoded?.userId;
-    if (!userId) {
-      console.error("❌ No user ID found in token payload:", decoded);
-      return res.status(400).json({ message: "User ID missing in token" });
-    }
+    if (!userId) return res.status(400).json({ message: "User ID missing in token" });
 
-    // ✅ 3. Extract order details
+    // 2️⃣ Extract order data
     const { cartItems, shippingInfo, payment } = req.body;
-    if (!cartItems || cartItems.length === 0) {
-      return res.status(400).json({ message: "Cart is empty" });
-    }
+    if (!cartItems?.length) return res.status(400).json({ message: "Cart is empty" });
 
     const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
-    // ✅ 4. Save order in MongoDB
+    // 3️⃣ Save order
     const order = await Order.create({
-      user: userId, // ensure this matches your schema
+      user: userId,
       items: cartItems.map((item) => ({
         productId: item.id || item._id || "unknown",
         name: item.name,
@@ -55,70 +59,59 @@ router.post("/", async (req, res) => {
       total,
     });
 
-    console.log("✅ Order saved successfully:", order._id);
+    console.log("✅ Order saved:", order._id);
 
-    // ✅ 5. Generate invoice PDF
-    const generateInvoicePDF = () => {
-      return new Promise((resolve, reject) => {
-        try {
-          const doc = new PDFDocument();
-          const buffers = [];
+    // 4️⃣ Generate PDF
+    const pdfBuffer = await new Promise((resolve, reject) => {
+      const doc = new PDFDocument();
+      const buffers = [];
+      doc.on("data", (data) => buffers.push(data));
+      doc.on("end", () => resolve(Buffer.concat(buffers)));
+      doc.on("error", reject);
 
-          doc.on("data", (data) => buffers.push(data));
-          doc.on("end", () => resolve(Buffer.concat(buffers)));
-          doc.on("error", reject);
-
-          doc.fontSize(18).text("Shopde Order Invoice", { align: "center" });
-          doc.moveDown();
-          doc.fontSize(12).text(`Order ID: ${order._id}`);
-          doc.text(`Customer: ${shippingInfo.name}`);
-          doc.text(`Address: ${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.zip}`);
-          doc.moveDown();
-          doc.text("Items:");
-          cartItems.forEach((item) => {
-            doc.text(`- ${item.name} x${item.qty} = ₹${item.price * item.qty}`);
-          });
-          doc.moveDown();
-          doc.fontSize(14).text(`Total: ₹${total}`, { align: "right" });
-          doc.end();
-        } catch (err) {
-          reject(err);
-        }
+      doc.fontSize(18).text("Shopde Order Invoice", { align: "center" });
+      doc.moveDown();
+      doc.fontSize(12).text(`Order ID: ${order._id}`);
+      doc.text(`Customer: ${shippingInfo.name}`);
+      doc.text(`Address: ${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.zip}`);
+      doc.moveDown();
+      doc.text("Items:");
+      cartItems.forEach((item) => {
+        doc.text(`- ${item.name} x${item.qty} = ₹${item.price * item.qty}`);
       });
-    };
-
-    const pdfBuffer = await generateInvoicePDF();
-
-    // ✅ 6. Send email
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.SHOP_EMAIL,
-        pass: process.env.SHOP_EMAIL_PASS,
-      },
+      doc.moveDown();
+      doc.fontSize(14).text(`Total: ₹${total}`, { align: "right" });
+      doc.end();
     });
 
-    const mailOptions = {
-      from: `"Shopde Orders" <${process.env.SHOP_EMAIL}>`,
-      to: process.env.SHOP_EMAIL,
-      subject: `🧾 New Order from ${shippingInfo.name}`,
-      text: `You received a new order worth ₹${total}. Check the attached invoice.`,
-      attachments: [
-        {
-          filename: `Order_${order._id}.pdf`,
-          content: pdfBuffer,
-        },
-      ],
-    };
+    // 5️⃣ Send email only if resend exists
+    if (resend) {
+      try {
+        const emailResponse = await resend.emails.send({
+          from: "Shopde Orders <onboarding@resend.dev>",
+          to: process.env.SHOP_EMAIL,
+          subject: `🧾 New Order from ${shippingInfo.name}`,
+          text: `You received a new order worth ₹${total}. Check the attached invoice.`,
+          attachments: [
+            {
+              filename: `Order_${order._id}.pdf`,
+              content: pdfBuffer.toString("base64"),
+            },
+          ],
+        });
 
-    await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully!");
+        console.log("✅ Email sent successfully:", emailResponse.id);
+      } catch (mailErr) {
+        console.error("❌ Email sending failed:", mailErr);
+      }
+    }
 
-    return res.json({
+    res.json({
       success: true,
       message: "Order placed successfully and invoice emailed!",
       orderId: order._id,
     });
+
   } catch (error) {
     console.error("❌ Order route error:", error);
     res.status(500).json({ success: false, message: "Order placement failed." });
